@@ -1,0 +1,89 @@
+import React, { useState, useEffect } from "react";
+
+const promptCategories = {
+  Fantasy: [
+    "Draw a dragon who's afraid of heights",
+    "Design a magical forest creature",
+    "Create a wizard's favorite snack"
+  ],
+  SciFi: [
+    "Draw a robot that loves flowers",
+    "Design a futuristic city powered by dreams",
+    "Invent an alien pet species"
+  ],
+  Silly: [
+    "Combine your two favorite foods into a creature",
+    "Draw a superhero with a useless power",
+    "Design a villain whose power is fear of ducks"
+  ]
+};
+
+export default function ArtPromptApp() {
+  const [selectedCategory, setSelectedCategory] = useState("Fantasy");
+  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem("favorites");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
+
+  const generatePrompt = () => {
+    const prompts = promptCategories[selectedCategory];
+    const randomIndex = Math.floor(Math.random() * prompts.length);
+    setCurrentPrompt(prompts[randomIndex]);
+  };
+
+  const saveFavorite = () => {
+    if (currentPrompt && !favorites.includes(currentPrompt)) {
+      setFavorites([...favorites, currentPrompt]);
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-xl mx-auto text-center">
+      <h1 className="text-2xl font-bold mb-4">🎨 Art Prompt Challenge</h1>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Select a Category:</label>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="px-4 py-2 rounded-xl border"
+        >
+          {Object.keys(promptCategories).map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <button onClick={generatePrompt} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl shadow mb-4">
+        Generate Prompt
+      </button>
+
+      {currentPrompt && (
+        <div className="bg-white p-4 rounded-xl shadow mb-4 border">
+          <p className="text-lg font-medium">{currentPrompt}</p>
+          <button onClick={saveFavorite} className="mt-2 text-sm text-blue-500 underline">
+            Save to Favorites
+          </button>
+        </div>
+      )}
+
+      {favorites.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold mb-2">⭐ Saved Prompts</h2>
+          <ul className="text-left list-disc list-inside">
+            {favorites.map((prompt, index) => (
+              <li key={index}>{prompt}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
